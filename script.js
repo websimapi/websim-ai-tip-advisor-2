@@ -25,16 +25,19 @@ async function analyzeEngagement() {
         const userId = user.id;
 
         // Fetch engagement data
-        const likeResponse = await websim.http.get(`/api/v1/users/${user.username}/project/${projectId}/like`);
-        const hasLiked = !!likeResponse.like;
+        const likeResponse = await fetch(`/api/v1/users/${user.username}/project/${projectId}/like`);
+        const likeData = await likeResponse.json();
+        const hasLiked = !!likeData.like;
 
-        const commentsResponse = await websim.http.get(`/api/v1/projects/${projectId}/comments`);
-        const userComments = commentsResponse.comments.data
+        const commentsResponse = await fetch(`/api/v1/projects/${projectId}/comments`);
+        const commentsData = await commentsResponse.json();
+        const userComments = commentsData.comments.data
             .filter(item => item.comment.author.id === userId)
             .map(item => ({ content: item.comment.raw_content, created_at: item.comment.created_at }));
 
-        const descendantsResponse = await websim.http.get(`/api/v1/projects/${projectId}/descendants`);
-        const hasRemixed = descendantsResponse.projects.data.some(p => p.project.created_by.id === userId);
+        const descendantsResponse = await fetch(`/api/v1/projects/${projectId}/descendants`);
+        const descendantsData = await descendantsResponse.json();
+        const hasRemixed = descendantsData.projects.data.some(p => p.project.created_by.id === userId);
 
         const engagementData = {
             hasLiked,
@@ -73,4 +76,3 @@ async function analyzeEngagement() {
 }
 
 document.getElementById('analyzeBtn').addEventListener('click', analyzeEngagement);
-
